@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/DashboardLayout"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:background="@drawable/gradient_shape"     
+    >
+
+    <LinearLayout
+        android:id="@+id/ButtonColumn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TitleBarLayout"
+        android:layout_weight="0"
+        android:orientation="vertical"
+        android:padding="6dp" >
+
+        <TextView
+            android:id="@+id/emotion_question"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:paddingBottom="15dp"
+            android:paddingTop="10dp"
+            android:text="How do you feel?"
+            style="@style/CommonLargeTextStyle"        
+            >
+        </TextView>
+
+        <GridView
+            android:id="@+id/gridView_emotions"
+            android:layout_width="fill_parent"
+            android:layout_height="287dp"
+            android:layout_weight="10.35"
+            android:columnWidth="90dp"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="auto_fit"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp" >
+
+        </GridView>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/tagImage"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:adjustViewBounds="true"
+        android:divider="@color/white"
+        android:dividerHeight="2dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="75dp"
+        android:paddingTop="15dp"
+        android:scaleType="center"
+        android:layout_below="@+id/gridView_emotions"   
+        android:src="@drawable/atlogo"
+        android:theme="@android:style/Theme.Translucent" />
+
+</LinearLayout>
+

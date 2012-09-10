@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/refresh_menuItem"
+          android:title="Refresh"
+          android:icon="@android:drawable/ic_menu_rotate" />
+    <item android:id="@+id/map_menuItem"
+          android:title="Map" 
+          android:icon="@android:drawable/ic_menu_mapmode" />
+    <item android:id="@+id/add_menuItem"
+          android:title="Add" 
+          android:icon="@android:drawable/ic_menu_add" />
+	<item android:id="@+id/settings_menuItem"
+          android:title="Settings" 
+          android:icon="@android:drawable/ic_menu_manage" />
+	<item android:id="@+id/quit_menuItem"
+          android:title="Quit" 
+          android:icon="@android:drawable/ic_menu_close_clear_cancel" />
+</menu>

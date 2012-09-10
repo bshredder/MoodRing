@@ -1,0 +1,854 @@
+
+
+urls that describe what to do to get the fingerprint needed for maps apikey;
+
+http://code.google.com/android/add-ons/google-apis/mapkey.html
+http://developer.android.com/guide/publishing/app-signing.html
+The Android build tools provide a debug signing mode that makes it easier for you to develop and debug your application, while still meeting the Android system requirement for signing your .apk. When using debug mode to build your app, the SDK tools invoke Keytool to automatically create a debug keystore and key. This debug key is then used to automatically sign the .apk, so you do not need to sign the package with your own key.
+The SDK tools create the debug keystore/key with predetermined names/passwords:
+
+    Keystore name: "debug.keystore"
+    Keystore password: "android"
+    Key alias: "androiddebugkey"
+    Key password: "android"
+    CN: "CN=Android Debug,O=Android,C=US"
+
+
+MD5 fingerprint of MoodRing debug key
+C3:AC:51:51:43:EC:60:2D:25:B8:0C:58:A2:51:CF:29
+
+The google maps api for debug moodring from: http://code.google.com/android/maps-api-signup.html
+
+0GK_fgsrDI9MCH97cvt_qHa85WMnwloDLw7Bsiw
+
+
+------------------------------------------------
+
+point has a range 
+- put a point on the map
+-- get points from webservice
+--- 
+
+range has a color based on the average of the ratings 
+- change the color of the point
+- base the color change off of a calculated value
+
+
+// refactoring ViewMap - here is working original onCreate code
+	// Handler that is called when the map is created.
+	
+7/23/12 removing heatmap service hacks
+
+	// TODO remove this hack
+	public Hashtable< Location, Integer > hack_GetNextPageListOfPins( Location inloc, long range) throws HeatMapSvcException 
+	{
+        
+		Hashtable<Location, Integer> table  = new Hashtable< Location, Integer >();
+		GetPinsResponse pinResponse = null;
+		
+        try {
+        	// filter the moods by range
+        	BasicFilter pinFilter = new BasicFilter();
+        	pinFilter.setRange(range);
+        	pinFilter.setLatitude(inloc.getLatitude());
+        	pinFilter.setLongitude(inloc.getLongitude());
+        	PinService.Instance().setFilter(pinFilter);
+
+        	BasicPager pager = new BasicPager();
+        	pager.setStartPosition(hackLastInThisList);
+        	PinService.Instance().setPager(pager);
+        	
+        	pinResponse = (GetPinsResponse) PinService.Instance().GetPins();	 
+			ArrayList<Pin> pins = pinResponse.getPins();
+			 			
+			for( int i = 0; i < pins.size(); i++ ){
+
+				 Location loc = new Location("");
+				 loc.setLatitude(pins.get(i).getLatitude() * 1000000 );
+				 loc.setLongitude(pins.get(i).getLongitude()  * 1000000 );
+				 	 
+				 table.put(loc, convertPinToMoodColor(pins.get(i) ) );
+				 
+					// TODO remove hack
+					hackTotalPinsToGet = pins.get(0).getTotalPinCount();	
+					hackLastInThisList = pins.get(i).getPinNumber();
+				 
+			 }
+		} 
+			
+        catch (Exception e) {
+        	e.printStackTrace();
+        	throw new HeatMapSvcException( e );
+        }
+		
+		return table;   
+	}
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	@Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+
+        // set layout
+        setContentView(R.layout.view_map);
+        
+        // get zoom controls
+        linearLayout = (LinearLayout) findViewById(R.id.zoomview);
+        mapView = (MapView) findViewById(R.id.mapview);
+        zoomControls = (ZoomControls) mapView.getZoomControls();
+        linearLayout.addView(zoomControls);
+        
+        // center the map at Milwaukee
+        GeoPoint homeLocation = new GeoPoint(HOME_LATITUDE_MICRO_DEGREES, HOME_LONGITUDE_MICRO_DEGREES);
+        mapController = mapView.getController();
+        mapController.setCenter(homeLocation);
+        
+        // set the zoom level
+        mapController.setZoom(DEFAULT_ZOOM_LEVEL);
+                
+        // get the points that have a mood associated with them
+        Intent intent = this.getIntent();        
+        Hashtable<Location, MoodRingTypes> pinList = null;     
+        
+        if(intent.hasExtra("PinList")) {
+        	pinList = (Hashtable<Location, MoodRingTypes>)intent.getExtras().get("PinList");    
+        }
+        
+        if( null == pinList ){	
+        	
+    	    HeatMapSvc hs = new HeatMapSvc();
+    	    Hashtable< Location, Color > test = hs.GetPointsToMap();	
+        	
+    	    try {
+				pinList = ps.GetPins();	
+			} 
+			
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}            
+        }
+        
+        // for each pin that has a mood - get its data
+        Iterator<Hashtable.Entry<Location, MoodRingTypes>> it = pinList.entrySet().iterator();
+        mapOverlays = mapView.getOverlays();
+        
+        while (it.hasNext()) {
+          
+        	Hashtable.Entry<Location, MoodRingTypes> entry = it.next();
+           
+        	// get the point from the pin
+        	GeoPoint point = new GeoPoint( (int)(entry.getKey().getLatitude()), (int)(entry.getKey().getLongitude()) );            
+          
+        	// create a heatmap overlay 
+        	HeatMapOverlay hm = new HeatMapOverlay(this, point, R.drawable.atlogo, entry.getValue());
+                    	
+        	// add the custom overlays to the map
+      	  	mapOverlays.add(hm);      	  
+        }    	
+    }
+
+    
+	private Hashtable< Location, Color> ConvertPinListToTable( IResponse r ){
+		
+		// TODO extract this from the response object - for now just mock it
+		Hashtable<Location, Color> table  = new Hashtable< Location, Color >();
+		
+		Location loc1 = new Location ("43, -87");
+		loc1.setLatitude(43038888);
+		loc1.setLongitude(-87906388);
+		table.put(loc1,  new Color() );
+
+		Location loc2 = new Location ("43, -87");		
+		loc2.setLatitude(43038888);
+		loc2.setLongitude(-87906388);
+		table.put(loc2,  new Color() );		
+		
+		Location loc3 = new Location ("43, -87");		
+		loc3.setLatitude(43038988);
+		loc3.setLongitude(-88906388);
+		table.put(loc3,  new Color() );		
+		
+		Location loc4 = new Location ("43, -87");		
+		loc4.setLatitude(44039888);
+		loc4.setLongitude(-87906388);
+		table.put(loc4,  new Color() );		
+
+		return table;
+	}
+	
+	
+	NEXT UP
+	
+	1. custom cell view for grid so that each emotion has a dif color
+	2. Add grid lines
+	
+	
+	    <item>@string/mood_angry</item>
+        <item>@string/mood_afraid</item>
+        <item>@string/mood_interested</item>
+        <item>@string/mood_balanced</item>
+        <item>@string/mood_bored</item>        
+        <item>@string/mood_happy</item>
+        <item>@string/mood_sad</item>        
+        <item>@string/mood_none</item> 
+        <item>@string/mood_depressed</item>  
+        
+        
+     high
+     
+   -       +
+   
+   
+     low
+     
+     
+     
+     angry
+     sad     happy
+     afraid interested 
+     
+     depressed bored estatic   
+        
+        
+        angry afraid estatic 		  red	
+        sad content happy 			  green
+        bored balanced interested     blue
+        
+sad                 nervous           hysterical       lovestruck
+worried          confused         happy             interested
+pained           peaceful          surprised       uncomfortable
+disgusted     disappointed  curious           angry        
+
+        <item>@string/mood_angry</item>
+        <item>@string/mood_afraid</item>
+        <item>@string/mood_interested</item>
+        <item>@string/mood_balanced</item>
+        <item>@string/mood_bored</item>        
+        <item>@string/mood_happy</item>
+        <item>@string/mood_sad</item>        
+        <item>@string/mood_none</item> 
+        <item>@string/mood_depressed</item>   
+
+
+// http://www.w3.org/TR/emotionml/
+
+public enum MoodRingTypes{
+	
+	// list is based on MIT research for 10 distinct affective states of emotion
+	/*
+    Upset,
+    Hostile,
+    Alert,          
+    Ashamed,
+    Inspired,         
+    Nervous,         
+    Determined,         
+    Attentive, 
+    Afraid,        
+    Active,
+    */
+	
+	// list derived from several psyc journals and practical review
+    NONE,
+    angry,
+    afraid,
+    interested,
+    balanced,
+    bored,
+    happy,
+    sad
+}
+
+RELEASE NOTES
+
+TASK 1
+
+removed the debug map key from the mapview.xml -> android:apiKey="0GK_fgsrDI9MCH97cvt_qHa85WMnwloDLw7Bsiw"
+and replaced with bablit apikey - not sure if i can reuse
+
+used moodring keystore - not sure if i can reuse
+
+TASK 2
+
+Since the map was not showing up after task 1, I thought it was that the mapapi key had not been generated from the 
+musicnote keystore - below generated new mapapi based on music note
+
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Users\wnschroe>cd ..
+
+C:\Users>cd ..
+
+C:\>cd C:\Program Files\Java\jre6\bin
+
+C:\Program Files\Java\jre6\bin>list
+'list' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Program Files\Java\jre6\bin>dir
+ Volume in drive C is OS
+ Volume Serial Number is 9CAF-61D8
+
+ Directory of C:\Program Files\Java\jre6\bin
+
+08/14/2010  10:43 AM    <DIR>          .
+08/14/2010  10:43 AM    <DIR>          ..
+05/29/2010  04:53 PM         1,208,320 awt.dll
+05/29/2010  04:53 PM           114,688 axbridge.dll
+05/29/2010  04:54 PM    <DIR>          client
+05/29/2010  04:53 PM           192,512 cmm.dll
+05/29/2010  04:53 PM           143,360 dcpr.dll
+05/29/2010  04:53 PM            77,824 deploy.dll
+05/29/2010  04:53 PM           411,368 deployJava1.dll
+05/29/2010  04:53 PM            16,896 dt_shmem.dll
+05/29/2010  04:53 PM            13,312 dt_socket.dll
+08/14/2010  10:43 AM               129 fingerprint.txt
+05/29/2010  04:53 PM           339,968 fontmanager.dll
+05/29/2010  04:53 PM            15,872 hpi.dll
+05/29/2010  04:53 PM           139,264 hprof.dll
+05/29/2010  04:53 PM            98,304 instrument.dll
+05/29/2010  04:53 PM            12,800 ioser12.dll
+05/29/2010  04:53 PM             7,680 j2pcsc.dll
+05/29/2010  04:53 PM            41,984 j2pkcs11.dll
+05/29/2010  04:53 PM            10,240 jaas_nt.dll
+05/29/2010  04:53 PM            33,568 java-rmi.exe
+05/29/2010  04:53 PM           126,976 java.dll
+05/29/2010  04:53 PM           145,184 java.exe
+05/29/2010  04:53 PM            59,168 javacpl.exe
+05/29/2010  04:53 PM           145,184 javaw.exe
+05/29/2010  04:53 PM           153,376 javaws.exe
+05/29/2010  04:53 PM            14,336 java_crw_demo.dll
+05/29/2010  04:53 PM             5,120 jawt.dll
+05/29/2010  04:53 PM            79,648 jbroker.exe
+05/29/2010  04:53 PM            36,352 JdbcOdbc.dll
+05/29/2010  04:53 PM           167,936 jdwp.dll
+05/29/2010  04:53 PM           208,896 jkernel.dll
+05/29/2010  04:53 PM            77,824 jli.dll
+05/29/2010  04:53 PM           108,320 jp2iexp.dll
+05/29/2010  04:53 PM            23,328 jp2launcher.exe
+05/29/2010  04:53 PM             8,192 jp2native.dll
+05/29/2010  04:53 PM            41,760 jp2ssv.dll
+05/29/2010  04:53 PM           147,456 jpeg.dll
+05/29/2010  04:53 PM            98,304 jpicom.dll
+05/29/2010  04:53 PM           110,592 jpiexp.dll
+05/29/2010  04:53 PM            98,304 jpinscp.dll
+05/29/2010  04:53 PM            65,536 jpioji.dll
+05/29/2010  04:53 PM           126,976 jpishare.dll
+05/29/2010  04:53 PM           153,376 jqs.exe
+05/29/2010  04:53 PM            55,072 jqsnotify.exe
+05/29/2010  04:53 PM           147,456 jsound.dll
+05/29/2010  04:53 PM            18,432 jsoundds.dll
+05/29/2010  04:53 PM            33,568 keytool.exe
+05/29/2010  04:53 PM            33,568 kinit.exe
+05/29/2010  04:53 PM            33,568 klist.exe
+05/29/2010  04:53 PM            33,568 ktab.exe
+05/29/2010  04:53 PM            18,432 management.dll
+05/29/2010  04:53 PM           602,112 mlib_image.dll
+05/29/2010  04:53 PM           348,160 msvcr71.dll
+05/29/2010  04:53 PM           266,293 msvcrt.dll
+05/29/2010  04:53 PM            77,824 net.dll
+05/29/2010  04:53 PM    <DIR>          new_plugin
+05/29/2010  04:53 PM            20,480 nio.dll
+05/29/2010  04:53 PM           411,368 npdeployJava1.dll
+05/29/2010  04:53 PM           136,992 npjpi160_20.dll
+05/29/2010  04:53 PM           131,072 npoji610.dll
+05/29/2010  04:53 PM             8,192 npt.dll
+05/29/2010  04:53 PM            33,568 orbd.exe
+05/29/2010  04:53 PM            33,568 pack200.exe
+05/29/2010  04:53 PM            33,568 policytool.exe
+04/12/2010  06:35 PM           270,336 regutils.dll
+05/29/2010  04:53 PM             5,120 rmi.dll
+05/29/2010  04:53 PM            33,568 rmid.exe
+05/29/2010  04:53 PM            33,568 rmiregistry.exe
+05/29/2010  04:53 PM            33,568 servertool.exe
+05/29/2010  04:53 PM           131,072 splashscreen.dll
+05/29/2010  04:53 PM           321,312 ssv.dll
+05/29/2010  04:53 PM            30,496 ssvagent.exe
+05/29/2010  04:53 PM            16,384 sunmscapi.dll
+05/29/2010  04:53 PM            33,568 tnameserv.exe
+05/29/2010  04:53 PM           245,400 unicows.dll
+05/29/2010  04:53 PM            61,440 unpack.dll
+05/29/2010  04:53 PM           132,896 unpack200.exe
+05/29/2010  04:53 PM            31,744 verify.dll
+05/29/2010  04:53 PM            24,701 w2k_lsa_auth.dll
+05/29/2010  04:53 PM           108,320 wsdetect.dll
+05/29/2010  04:53 PM            46,592 zip.dll
+              78 File(s)      9,117,179 bytes
+               4 Dir(s)  130,669,203,456 bytes free
+
+C:\Program Files\Java\jre6\bin>keytool -list -alias android -keystore C:\Develop
+ment\MusicNoteKeystore.keystore
+keytool error: java.lang.Exception: Keystore file does not exist: C:\Development
+\MusicNoteKeystore.keystore
+
+C:\Program Files\Java\jre6\bin>keytool -list -alias android -keystore C:\Develop
+ment\MusicNoteKeystore
+Enter keystore password:
+android, Sep 10, 2011, PrivateKeyEntry,
+Certificate fingerprint (MD5): CD:3A:C0:70:9C:37:38:B6:9D:2A:3D:62:BA:F3:26:7F
+
+C:\Program Files\Java\jre6\bin>
+
+Then from google maps ...
+
+Your key is:
+
+0BvF8R3ksS0Ns5W9Uk3ytpGDycar7vzrE0oQuAw
+
+This key is good for all apps signed with your certificate whose fingerprint is:
+
+CD:3A:C0:70:9C:37:38:B6:9D:2A:3D:62:BA:F3:26:7F
+
+Here is an example xml layout to get you started on your way to mapping glory:
+
+              <com.google.android.maps.MapView
+                 android:layout_width="fill_parent"
+                 android:layout_height="fill_parent"
+                 android:apiKey="0BvF8R3ksS0Ns5W9Uk3ytpGDycar7vzrE0oQuAw"
+                 />
+            
+
+Enhancements / Bugs
+
+1. toast messages not popping up and/or not running in parallel in own thread
+2. webservice call to write should be after showing map for speed
+3. move string parsing to server?
+
+
+
+            tv.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                	
+                	v.setBackgroundColor(Color.BLACK);
+                	Toast toast = Toast.makeText(context, "Button click", Toast.LENGTH_LONG);
+                	toast.show();
+                	
+        
+                }
+                
+                
+             });
+        
+        
+        + add
+        
+        /*
+	    try {    	    		    	
+	
+	    	
+	    	// get the points of affect from the service
+	    	Intent intent = new Intent();
+		    Hashtable< Location, Integer > moodPointList = 
+		    	HeatMapSvc.Instance().GetPointsToMap( GlobalSettings.Instance().getLocation(),GlobalSettings.Instance().getVisibility() );				
+	        Iterator<Hashtable.Entry<Location, Integer>> it = moodPointList.entrySet().iterator();
+	        mapOverlays = mapView.getOverlays();
+	        
+	        while (it.hasNext()) {
+	          
+	        	Entry<Location, Integer> entry = it.next();
+	           
+	        	// TODO - this is a hack to convert 0,0 locations to "home" location
+	        	//      - the rational is that these are locations that were "missed" before
+	        	//		- the service initialized need to test this and determine if it is valid assumption
+	        	// get the location of the affective point from the pin
+	        	GeoPoint point = null;
+	        	if( 0 == (entry.getKey().getLatitude()) ||  0 == (entry.getKey().getLongitude()) ){
+	        		point = new GeoPoint(HOME_LATITUDE_MICRO_DEGREES, HOME_LONGITUDE_MICRO_DEGREES);
+	        	}
+	        	else {
+		        	point = new GeoPoint( (int)(entry.getKey().getLatitude()), (int)(entry.getKey().getLongitude()) );            	        		
+	        	}
+        	
+	        	// create a heatmap overlay 
+	        	HeatMapOverlay hm = new HeatMapOverlay(this, point, R.drawable.atlogo, entry.getValue());
+	                    	
+	        	// draw the custom overlays on top of the map
+	      	  	mapOverlays.add(hm);      	  
+	        }  	    	
+		} 
+			
+		catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		}  
+		*/
+  	  	//pDialog.dismiss();	     
+  	  	
+  	  	
+  	// TODO remove this hack
+	private static long hackTotalPinsToGet = 1;
+	private static long hackLastInThisList = 0;
+	
+	public boolean hack_isMorePinsToGet() {
+		
+		if( hackLastInThisList < hackTotalPinsToGet ){
+			return true;
+		}
+		return false;
+	}
+	
+	public long hack_getLastPinNumber(){
+		return hackLastInThisList;
+	}
+	
+	public long hack_getTotalNumPins() {
+		return hackTotalPinsToGet;
+		
+// depracated veiwmapactivity
+]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+package com.moodring.view;
+
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+import com.google.android.maps.Overlay;
+
+/********************************************************************************************************************
+ * Workflow description
+ * 
+ * Initialization
+ *
+ * 		A) When entering ViewMap display a GOOGLEMAP with a MapKeyOverlay centered on the users location. This should
+ * 		come up fast to delight the user with a snappy screen switch. 
+ * 
+ * 		B) Inform the user through a progress dialog that APP is fetching "moods" from server for this location while
+ * 			HeatMapSvc is fetching 1st batch of pins
+ * 
+ * 		C) Draw the batch of pins when you receive them 
+ * 
+ * 		D) Display on the ViewMap the number of total moods and the number of drawn moods 
+ * 
+ * 		E) Inform the user the APP will be getting more pins in the background
+ * 
+ * 		F) Repeat C - E until all pins are recieved
+ * 
+ * (before calling webservice) On start of activity - get first batch of pins and tell the user what you are doing
+ * (webservice returns) Dismiss dialog
+ * (notify update thread) Display results 
+ * (before calling webservice?)If there are more batches - tell the user your going to get them and get them
+ * (webservice returns) Dismiss dialog 
+ * (notify update thread) Display results
+ * 
+ * Hashtable is thread safe
+ * Semaphore used for predictability
+ * 
+ ********************************************************************************************************************/
+
+public class ViewMapActivity_tobeDepracated_again extends MapActivity 
+{
+	private MapView mapView;
+	private List<Overlay> mapOverlays;
+	private MapController mapController;
+	private MoodServiceThread _MoodSvcThread;	
+	private Hashtable< Location, Integer > moodPointList = new Hashtable<Location, Integer>();	
+
+	// Milwaukee's location
+	private static final int HOME_LATITUDE_MICRO_DEGREES = 43038888;
+	private static final int HOME_LONGITUDE_MICRO_DEGREES = -87906388;
+	
+	// custom messages for thread communication
+	private static final int DRAW_MOOD_LIST_MSG = 4;
+	private static final int NO_MORE_MOODS_MSG = 3;	
+	private static final int READ_FROM_WEBSERVICE = 2;
+
+	// update statistics
+	private ProgressDialog _statusDialog;
+	private long _totalNumMoods = 0;
+	private int _totalNumMoodsFetched = 0;	
+	
+	
+	@Override
+    public void onCreate(Bundle savedInstanceState) 
+    {	
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.mapview);
+  
+        // get zoom controls
+        mapView = (MapView) findViewById(R.id.mapview);
+        mapView.setBuiltInZoomControls(true);        
+        
+        // center the map at Milwaukee
+        // TODO change this to center on your current location
+        GeoPoint homeLocation = new GeoPoint(0,0);
+        if( 0 == homeLocation.getLatitudeE6() || 0 == homeLocation.getLongitudeE6() ){
+        	homeLocation = new GeoPoint(HOME_LATITUDE_MICRO_DEGREES, HOME_LONGITUDE_MICRO_DEGREES);
+        }
+        	
+        mapController = mapView.getController();
+        mapController.setCenter(homeLocation);
+        
+		mapOverlays = mapView.getOverlays();        			
+		mapOverlays.add(new MapKeyOverlay(this, null, 0, null));          
+                           	
+		_MoodSvcThread = new MoodServiceThread();
+		_MoodSvcThread.start();	    
+		_MoodSvcThread.initHandler();
+		_MoodSvcThread._MoodSvcHandler.sendEmptyMessage(READ_FROM_WEBSERVICE);   
+		
+		_statusDialog = new ProgressDialog(this);
+    }
+	
+	/****************************************************************************************************
+	 * MESSAGE PUMP for MapView
+	* 
+	* Handle incoming messages for ViewMap
+	*
+	*****************************************************************************************************/
+	private Handler _ViewMapHandler = new Handler() {
+		
+	@Override
+	public void handleMessage(Message msg) {
+		
+		switch (msg.what) {
+		
+		case NO_MORE_MOODS_MSG:{
+			_statusDialog.dismiss();
+			break;
+		}
+		
+		case DRAW_MOOD_LIST_MSG: {
+			 try { 		
+				 
+				 // get an iterator to the shared Hashtable with service thread (Hashtable is thread safe)
+				 Iterator<Hashtable.Entry<Location, Integer>> it = moodPointList.entrySet().iterator();
+				
+				 // update mood statistics
+				_totalNumMoodsFetched = ( _totalNumMoodsFetched + moodPointList.size() );
+				
+				// Display mood statistics to user
+				String totalMoods = String.valueOf(_totalNumMoods);
+				String totalMoodsFetched = String.valueOf( _totalNumMoodsFetched );
+				_statusDialog.setMessage(
+						"Updating " + totalMoodsFetched + " of " + totalMoods + " total moods for your location");
+				_statusDialog.show();
+
+				// if the shared Hashtable has entries - process them
+				while (it.hasNext()) {
+					Entry<Location, Integer> entry = it.next();
+           
+					// TODO - this is a hack to convert 0,0 locations to "home" location
+					//      - the rational is that these are locations that were "missed" before
+					//		- the service initialized need to test this and determine if it is valid assumption
+					// get the location of the affective point from the pin
+					GeoPoint point = null;
+					if( 0 == (entry.getKey().getLatitude()) ||  0 == (entry.getKey().getLongitude()) ){
+						point = new GeoPoint(HOME_LATITUDE_MICRO_DEGREES, HOME_LONGITUDE_MICRO_DEGREES);
+					}
+					else	 {
+						point = new GeoPoint( (int)(entry.getKey().getLatitude()), (int)(entry.getKey().getLongitude()) );            	        		
+					}
+    	
+					// create and add an overlay with mood information 
+					HeatMapOverlay hm = new HeatMapOverlay(getBaseContext(), point, 0, entry.getValue());
+      	  			mapOverlays.add(hm);      	  
+				}  	
+				
+				// clear the shared Hashtable
+				moodPointList.clear();
+				
+				// done drawing the last fetch - tell the service thread to do its thing
+				_MoodSvcThread._MoodSvcHandler.sendEmptyMessage(READ_FROM_WEBSERVICE);  				
+				
+			 } // end try
+			 
+			 catch (Exception e) {
+				e.printStackTrace();					
+			} // end catch
+		
+			break;
+		
+		} // end case
+		} // end switch
+	} // end handle message
+	};
+	
+	
+    @Override
+    protected boolean isRouteDisplayed() 
+    {
+        return false;
+    }
+    
+    public boolean onCreateOptionsMenu(Menu menu) 
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.map_menu, menu);
+        return true;
+    }	
+	
+    public boolean onOptionsItemSelected(MenuItem item) 
+    {
+    	Intent intent = null;
+        switch (item.getItemId()) 
+        {	            
+	        case R.id.settings_menuItem:        	
+	        	intent = new Intent();
+	        	intent.setClass(ViewMapActivity_tobeDepracated_again.this, ChangeSettingsActivity.class);
+	    		startActivity(intent); 		        	
+	    		finish();
+	        	return true;
+	            
+	        case R.id.home_menuItem:
+	        	intent = new Intent();
+	            intent.setClass(ViewMapActivity_tobeDepracated_again.this, EmotionGridActivity.class);
+	            startActivity(intent);
+	            finish();
+	        	return true;
+        }
+        return false;
+    }
+	
+    
+    /**************************************************************************************************** 
+	  * HeatMapSvc Worker thread 
+	  * 
+	  * Nested class that performs HeatMapSvc operations to webservice  
+	  * 
+	  * **************************************************************************************************/
+    private class MoodServiceThread extends Thread {
+   	
+		public Handler _MoodSvcHandler;
+    	
+        public void run() {
+        	Looper.prepare();     	
+        	Looper.loop();     
+        } // end run
+        
+        public synchronized void initHandler() {
+        	// create a handler on this this thread        	
+        	_MoodSvcHandler = new MoodServiceThreadHandler(); 
+        }
+        
+        
+    };  // end MoodServiceThread     
+    
+	 /***************************************************************************************************
+	  * Message Queue for Service Thread 
+	  * 
+	  * Handler to process msgs for helper thread 
+	  * 
+	  ****************************************************************************************************/    
+    private class MoodServiceThreadHandler extends Handler {  
+    	private Hashtable< Location, Integer > moodPointListFromService;  
+    	    	
+        @Override  
+        public void handleMessage(Message msg) {  
+        	
+        	switch( msg.what ){
+        	
+        	case READ_FROM_WEBSERVICE:
+        		if(IsPinsFromWebService() ){
+        			ReadPinsFromWebservice();
+        		}
+        		else{
+        	    	_ViewMapHandler.sendEmptyMessage(NO_MORE_MOODS_MSG);           			
+        		}
+        		break;        	
+        	} // end switch
+        }  // end handleMessage
+        
+        private long getTotalNumPins(){
+        	return HeatMapSvc.Instance().hack_getTotalNumPins();
+        }
+        
+        private boolean IsPinsFromWebService(){
+			 return HeatMapSvc.Instance().hack_isMorePinsToGet();  	
+        }
+        
+    	private void ReadPinsFromWebservice(){
+    		try {    	   	 	    		            		
+                	moodPointListFromService = 
+        	    				HeatMapSvc.Instance().hack_GetNextPageListOfPins(GlobalSettings.Instance().getLocation(),GlobalSettings.Instance().getVisibility() );
+        	    			
+        	    	// if there are new pins
+        	    	if(moodPointListFromService.size() > 0)
+        	    	{
+        	    			// run through the pinlist received from webservice and add them to local parent object's pinlist
+        	    			Iterator<Hashtable.Entry<Location, Integer>> it = moodPointListFromService.entrySet().iterator();
+            	       
+        	    			while (it.hasNext()) {   
+        	   					Hashtable.Entry<Location, Integer> entry = it.next();
+        	   					moodPointList.put( entry.getKey(), entry.getValue());   
+        	    			}
+        	    			moodPointListFromService.clear(); 
+        	    			
+            		} // end if moodPointListFromService     	    			       	    		
+        	    } // end try
+        	    
+        		catch (Exception e) {
+        				e.printStackTrace();
+        		} // end catch
+        		
+        		// update the main UI stats - dangerous not thread safe
+        		_totalNumMoods = getTotalNumPins();
+        		
+        		// draw 0 - (number of moods) from UI thread
+    	    	_ViewMapHandler.sendEmptyMessage(DRAW_MOOD_LIST_MSG);             		
+    	}        
+        
+    }; // end MoodServiceThreadHandler
+
+}; // end ViewMap Class		
+		
+	}		  	    
+	
+	
+	
+	------------------------ 8/23/12
+	
+	removed this from change settings - saving in case want to change layout back ...
+		    <Spinner
+	        android:id="@+id/VisibilitySettingsSpinner"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:gravity="center_vertical|center_horizontal"
+	        android:textSize="12sp" />
+	        
+	        
+        // setup visibility spinner
+        Spinner visibilitySettingsSpinner = (Spinner) findViewById(R.id.VisibilitySettingsSpinner);
+        ArrayAdapter<CharSequence> visibilitySettingsSpinnerAdapter = ArrayAdapter.createFromResource(
+        		this, R.array.visibility_array, android.R.layout.simple_spinner_item);
+        
+        visibilitySettingsSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        visibilitySettingsSpinner.setAdapter(visibilitySettingsSpinnerAdapter);
+
+        // set range
+        long visibility = GlobalSettings.Instance().getVisibility();   
+        visibilitySettingsSpinner.setSelection(visibilitySettingsSpinnerAdapter.getPosition( Long.toString( visibility ) ));  
+        
+----------------------------------  PROGRESS FILL 
+    	
+<?xml version="1.0" encoding="UTF-8"?>
+                 
+<shape 
+    xmlns:android="http://schemas.android.com/apk/res/android">
+             <gradient android:startColor="#FF470000" android:centerColor="#FFB80000"
+    android:endColor="#FFFF4400" android:angle="180" />
+             <corners android:radius="5px" />
+             <stroke android:width="2dp" android:color="#50999999" />
+             <stroke android:width="1dp" android:color="#70555555" />
+                 
+</shape>
+    	        

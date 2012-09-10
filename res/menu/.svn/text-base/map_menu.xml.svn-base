@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/go_there_menuItem"
+          android:title="Go There"
+          android:icon="@android:drawable/ic_menu_directions" />
+    <item android:id="@+id/list_menuItem"
+          android:title="List"
+          android:icon="@android:drawable/ic_menu_myplaces" />
+	<item android:id="@+id/settings_menuItem"
+          android:title="Settings" 
+          android:icon="@android:drawable/ic_menu_manage" />
+	<item android:id="@+id/quit_menuItem"
+          android:title="Quit" 
+          android:icon="@android:drawable/ic_menu_close_clear_cancel" />
+</menu>

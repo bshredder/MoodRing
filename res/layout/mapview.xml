@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MapLayout"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView android:text="Retrieving moods for this location ..." 
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:id="@+id/textMoodStats"
+	android:layout_alignParentBottom="true">
+    </TextView>
+
+
+    <com.google.android.maps.MapView
+        android:id="@+id/mapview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="true"
+        android:apiKey="0BvF8R3ksS0Ns5W9Uk3ytpGDycar7vzrE0oQuAw"
+		android:layout_above="@+id/textMoodStats"        
+    />
+        
+    <LinearLayout
+	    android:id="@+id/zoomview"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignBottom="@id/mapview"
+	    android:layout_centerHorizontal="true"
+
+	/>
+	
+
+    	
+</RelativeLayout>
+

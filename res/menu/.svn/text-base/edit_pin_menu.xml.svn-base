@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/take_picture_menuItem"
+          android:title="Take Picture"
+          android:icon="@android:drawable/ic_menu_camera" />
+    <!--
+	<item android:id="@+id/choose_picture_menuItem"
+          android:title="Choose Picture" 
+          android:icon="@android:drawable/ic_menu_set_as" />
+    -->
+	<item android:id="@+id/delete_picture_menuItem"
+          android:title="Delete Picture" 
+          android:icon="@android:drawable/ic_menu_delete" />
+</menu>

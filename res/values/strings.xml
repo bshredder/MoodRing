@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="activity_sample_code">Maps API Demos</string>
+    <string name="app_name">Mood Map</string>    
+
+    <string name="mood_angry">Angry</string> 
+    <string name="mood_afraid">Interested</string> 
+    <string name="mood_interested">Joy</string> 
+    <string name="mood_balanced">Sad</string> 
+    <string name="mood_bored">Peaceful</string> 
+    <string name="mood_happy">Happy</string> 
+    <string name="mood_sad">Annoyed</string>  
+    <string name="mood_none">Bored</string> 
+    <string name="mood_depressed">Curious</string> 
+
+    <string name="RangeSettings"> Range Settings (KM)</string>     
+    <string name="RangePrefix">Current Range: </string>      
+    <string name="UpdateButtonText">Update</string>  
+    <string name="CancelButtonText">Cancel</string>          
+     
+	
+	<color name = "black">#FF0000</color>
+	<color name="graytext">#505050</color>
+	<color name="lightgreen">#E1ECD2</color>
+	<color name="mediumgreen">#CFE1B8</color>
+	<color name="backgroundgreen">#8AB652</color>
+	<color name="slateblue">#7b68ee</color>
+	<color name="yellowgreen">#9acd32</color>
+	<color name="androidgreen">#A6C73A</color>
+	<color name="slate">#778899</color>
+	<color name="white">#FFFFFF</color>
+	<color name= "light_blue">#AEDBFF</color>
+	<color name= "medium_blue">#6DA9FF</color>
+	<color name= "red">#F90000</color>		
+   
+</resources>
+

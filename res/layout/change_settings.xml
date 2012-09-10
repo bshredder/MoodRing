@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/ChangeSettingsLayout"
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent"
+	android:paddingLeft="10dp"
+	android:paddingRight="10dp"
+	android:paddingTop="10dp"
+	android:background = "@drawable/gradient_shape"    
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	
+	<TextView 
+		android:id="@+id/VisibilitySettingsLabel"
+		android:layout_height="wrap_content" 
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical|center_horizontal"	  	
+		android:text="@string/RangeSettings"
+		android:paddingTop = "15sp"	
+		android:paddingBottom = "15sp"
+		style="@style/CommonLargeTextStyle"		
+		>
+	</TextView>
+
+	<SeekBar
+	    android:id="@+id/seekBarRange"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_centerHorizontal="true"
+		android:progressDrawable="@drawable/seekbar_progress"
+		android:thumb="@drawable/seekbar_thumb_states"		
+		android:max="100000"	
+		android:minWidth="250dp"	
+		android:minHeight="35dp"	    
+	    android:layout_below="@+id/VisibilitySettingsLabel" />    
+		
+	<TextView
+		android:id="@+id/textViewActualRange"
+		android:layout_below="@+id/seekBarRange"	
+		android:layout_centerHorizontal="true"	
+		android:text="@string/RangePrefix"
+		android:gravity="center" 
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"		
+		android:paddingTop="15sp"
+		style="@style/CommonLargeTextStyle">
+	</TextView>	
+	
+	<LinearLayout
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/ChangeSettingsButtonLayout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/textViewActualRange"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="horizontal"
+	    android:paddingTop="60sp" >
+
+	    <Button
+	        android:id="@+id/UpdateSettingsButton"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/UpdateButtonText"
+	        android:width="100sp" 
+			style="@style/CommonTextStyle"	        
+	        >
+	    </Button>
+
+	    <Button
+	        android:id="@+id/CancelSettingsButton"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/CancelButtonText"
+	        android:width="100sp" 
+			style="@style/CommonTextStyle"	 	        
+	        >
+	    </Button>
+	</LinearLayout>
+	
+	<LinearLayout android:id="@+id/logo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+android:layout_alignParentBottom="true">
+		
+		android:orientation="vertical"
+		android:layout_below="@+id/ChangeSettingsButtonLayout"
+		android:paddingTop="60dp"
+		xmlns:android="http://schemas.android.com/apk/res/android">	
+	
+		<ImageView
+		android:id = "@+id/tagImage"
+		android:src="@drawable/atlogo"	
+		
+		android:scaleType="center"
+   		android:layout_height="wrap_content"			
+        android:layout_width="wrap_content"
+        android:adjustViewBounds="true"        
+		android:divider = "@color/white" 
+		android:dividerHeight = "2dp"        
+		android:paddingBottom="8dp"
+		android:paddingTop="15dp"
+		android:paddingLeft="85dp"
+		android:gravity="center_vertical|center_horizontal"	  	
+		android:theme="@android:style/Theme.Translucent"  >		
+	</ImageView> 	
+	
+	</LinearLayout>
+
+
+
+</RelativeLayout>

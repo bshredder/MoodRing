@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="mood_types_list">
+    
+        <item>@string/mood_angry</item>
+        <item>@string/mood_afraid</item>
+        <item>@string/mood_interested</item>
+        <item>@string/mood_balanced</item>
+        <item>@string/mood_bored</item>        
+        <item>@string/mood_happy</item>
+        <item>@string/mood_sad</item>        
+        <item>@string/mood_none</item> 
+        <item>@string/mood_depressed</item>     
+        
+    </string-array>
+    
+   <array name="emotion_colors">        
+		<item> #FF5C00 </item>
+		<item> #E60F00 </item>
+		<item> #590F00 </item>
+		<item> #6FB332 </item>
+		<item> #27B600 </item>
+		<item> #367900 </item>
+		<item> #0068F5 </item>
+		<item> #0049E1 </item>
+		<item> #001FBC </item>	
+    </array>     
+    
+	<string-array name="visibility_array">
+		<item>100000</item>
+		<item>10000</item>
+		<item>1000</item>
+		<item>100</item>	
+	</string-array>       
+
+</resources>
